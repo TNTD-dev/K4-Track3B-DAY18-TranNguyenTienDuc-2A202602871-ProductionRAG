@@ -148,3 +148,68 @@ K4-Track3B-Production-RAG/
   *(Ví dụ: `K4-Track3B-DAY18-NguyenVanAn-AI20K001-ProductionRAG`)*
 - **Hạn chót nộp bài:** **11h59 ngày hôm sau diễn ra bài lab (GMT+7)** trên cổng VLearn LMS / Codelab.
 - **Chi tiết yêu cầu:** Xem tại [ASSIGNMENT.md](ASSIGNMENT.md) và [RUBRIC.md](RUBRIC.md).
+
+## Bản triển khai của Trần Nguyễn Tiến Đức
+
+Pipeline retrieve **child** bằng BM25 + BGE-M3 + RRF, rerank nội dung nguồn bằng
+BGE reranker, rồi mở rộng thành tối đa 3 **parent khác nhau** để trả lời. ID parent
+phụ thuộc nguồn và nội dung nên không trùng giữa tài liệu. Context của LLM dùng
+văn bản gốc và tên nguồn; summary/HyQA được dùng để tìm kiếm.
+
+Enrichment mặc định dùng combined JSON (1 request/chunk), tối đa 4 request đồng
+thời. Cache theo nội dung, nguồn và phiên bản prompt nằm trong `.cache/enrichment/`
+(được gitignore). Khi API không hoạt động, trạng thái fallback được ghi nhận.
+Không có API key vẫn chạy retrieval, nhưng không có điểm RAGAS hợp lệ.
+
+Answer Relevancy sinh câu hỏi tiếng Việt với ví dụ chung được dịch từ RAGAS và
+ví dụ phủ định về giờ mở cửa thư viện (phân biệt trả lời “không” với “không biết”);
+prompt được lưu tại `reports/evaluator_prompt_vi.json`, công thức metric giữ nguyên.
+Baseline và production dùng cùng model trả lời, prompt, temperature=0, embedding
+và bộ 20 câu hỏi. Ground truth chỉ được truyền vào evaluator, không vào retrieval
+hoặc generation. Bộ test cố định nhỏ nên kết quả chưa chứng minh tổng quát hóa.
+
+Dùng Python 3.11 của virtualenv; Python mặc định trên máy có thể là 3.9:
+
+```bash
+source .venv/bin/activate
+# Nếu tải Hugging Face bị treo ở Xet:
+export HF_HUB_DISABLE_XET=1
+docker compose up -d
+python main.py
+python check_lab.py
+```
+
+- `reports/ragas_report.json`: aggregate, từng câu hỏi, bottom-5, trạng thái
+  evaluator, model, backend và latency.
+- `reports/naive_baseline_report.json`: cùng schema để so sánh baseline.
+- `reports/latency_report.json`: thời gian build, retrieval, reranking, generation,
+  evaluation (đơn vị ms). Model tải lần đầu và cache ảnh hưởng thời gian build.
+- `analysis/failure_analysis.md`: kết quả thực nghiệm và Diagnostic Tree.
+- `analysis/reflections/reflection_TranNguyenTienDuc.md`: mapping 5 modules,
+  debug và kế hoạch cho trợ lý chính sách nội bộ của lab.
+
+`check_lab.py` trả exit code khác 0 khi thiếu deliverable, test/lint thất bại hoặc
+đánh giá RAGAS không thành công. Điểm 0 từ fallback không được coi là điểm thật.
+Qdrant in-memory fallback được ghi trong report khi server không hoạt động.
+Hai PDF scan cần OCR trước khi đưa vào corpus; không tạo văn bản giả để lấp chỗ trống.
+
+API được đối chiếu với [Qdrant collections](https://qdrant.tech/documentation/manage-data/collections/),
+[Qdrant search](https://qdrant.tech/documentation/search/) và
+[RAGAS RunConfig](https://docs.ragas.io/en/v0.2.0/howtos/customizations/_run_config/).
+BGE-M3 được load với `use_safetensors=False` để không tự download bản conversion
+trong background của transformers; BGE reranker dùng safetensors chính thức.
+Code dùng RAGAS 0.1.x theo requirements của đề; không sử dụng schema 0.2.x.
+
+Nếu tải weight lớn bị gián đoạn, có thể chạy `python scripts/download_models.py`.
+Script tải range từ CDN chính thức Hugging Face, tiếp tục các phần đã lưu, xác minh
+SHA-256 trước khi đưa vào cache, rồi xóa các phần tạm. Cần khoảng 9 GB dung lượng
+trống trong lúc ghép hai weight. Không cần token Hugging Face cho các model public.
+
+Sau khi đã tải đầy đủ model, có thể kiểm tra hoàn toàn từ cache để tránh chờ mạng:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python check_lab.py
+```
+
+Xem thêm `analysis/rubric_checklist.md` để đối chiếu từng tiêu chí với bằng chứng,
+và `analysis/failure_analysis.md` cho bảng kết quả cùng các giới hạn còn lại.

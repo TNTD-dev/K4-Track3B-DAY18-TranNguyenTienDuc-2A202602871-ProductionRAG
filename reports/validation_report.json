@@ -1,0 +1,25 @@
+{
+  "checked_at_utc": "2026-10-04T12:46:42.448639+00:00",
+  "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_XET=1 .venv/bin/python check_lab.py",
+  "exit_code": 0,
+  "tests_passed": 47,
+  "test_seconds": 23.27,
+  "ruff": "passed",
+  "git_diff_check": "passed",
+  "production_valid": true,
+  "baseline_valid": true,
+  "production_metrics_ge_0_70": 4,
+  "notes": [
+    "An earlier online submission check timed out; the complete suite passed using cached official models offline.",
+    "Migration preserves the genuine measured reports because Track 3B corpus/test set are byte-identical; class labels were corrected.",
+    "LMS submission must use the new Track 3B fork URL."
+  ],
+  "migration_to_track_3b": {
+    "checked_at_utc": "2026-10-04T12:53:40.652893+00:00",
+    "upstream": "VinUni-AI20k/K4-Track3B-Day18-Production-RAG",
+    "fork": "TNTD-dev/K4-Track3B-DAY18-TranNguyenTienDuc-2A202602871-ProductionRAG",
+    "submission_check_exit_code": 0,
+    "submission_check_output": "...............................................                          [100%]\n47 passed in 18.21s\nAll checks passed!\nMetrics >= 0.70: 4/4\nSubmission checks passed\n",
+    "corpus_and_test_set_unchanged": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "question": "Khi phát hiện malware trên máy, nhân viên có nên tự xử lý không?",
+  "answer": "Nhân viên **không nên tự ý xử lý malware** hoặc tìm cách khắc phục mà không có sự hướng dẫn của đội CNTT. Điều này được nêu rõ trong quy trình xử lý sự cố bảo mật. (Nguồn: bao_mat_su_co.md)",
+  "judge_outputs": {
+    "initial": [
+      "```{\"question\": \"Nhân viên có được tự ý xử lý malware không?\", \"noncommittal\": 1}```",
+      "```{\"question\": \"Nhân viên có thể tự ý xử lý malware không?\", \"noncommittal\": 1}```",
+      "```{\"question\": \"Nhân viên có thể tự ý xử lý malware không?\", \"noncommittal\": 1}```"
+    ],
+    "negation_clarified": [
+      "```{\"question\": \"Nhân viên có thể tự ý xử lý malware không?\", \"noncommittal\": 0}```",
+      "```{\"question\": \"Nhân viên có thể tự ý xử lý malware không?\", \"noncommittal\": 0}```",
+      "```{\"question\": \"Nhân viên có thể tự ý xử lý malware không?\", \"noncommittal\": 0}```"
+    ]
+  },
+  "note": "Diagnostic rerun; not retained outputs from initial evaluation. Initial prompt is reconstructed from unchanged translated examples and initial instruction. No question or ground truth is included in the judge prompt."
+}

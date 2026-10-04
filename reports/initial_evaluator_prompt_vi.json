@@ -1,0 +1,46 @@
+{
+  "name": "question_generation",
+  "instruction": "Generate a question for the given answer and Identify if answer is noncommittal. Give noncommittal as 1 if the answer is noncommittal and 0 if the answer is committal. A noncommittal answer is one that is evasive, vague, or ambiguous. For example, \"I don't know\" or \"I'm not sure\" are noncommittal answers Generate the question in Vietnamese.",
+  "output_format_instruction": "The output should be a well-formatted JSON instance that conforms to the JSON schema below.\n\nAs an example, for the schema {\"properties\": {\"foo\": {\"title\": \"Foo\", \"description\": \"a list of strings\", \"type\": \"array\", \"items\": {\"type\": \"string\"}}}, \"required\": [\"foo\"]}\nthe object {\"foo\": [\"bar\", \"baz\"]} is a well-formatted instance of the schema. The object {\"properties\": {\"foo\": [\"bar\", \"baz\"]}} is not well-formatted.\n\nHere is the output JSON schema:\n```\n{\"type\": \"object\", \"properties\": {\"question\": {\"title\": \"Question\", \"type\": \"string\"}, \"noncommittal\": {\"title\": \"Noncommittal\", \"type\": \"integer\"}}, \"required\": [\"question\", \"noncommittal\"]}\n```\n\nDo not return any preamble or explanations, return only a pure JSON string surrounded by triple backticks (```).",
+  "examples": [
+    {
+      "answer": "Albert Einstein sinh ra ở Đức.",
+      "context": "Albert Einstein là nhà vật lý lý thuyết sinh ra ở Đức.",
+      "output": {
+        "question": "Albert Einstein sinh ra ở đâu?",
+        "noncommittal": 0
+      }
+    },
+    {
+      "answer": "Nó có thể đổi màu da theo nhiệt độ môi trường.",
+      "context": "Một loài ếch mới ở rừng Amazon có khả năng đổi màu da theo nhiệt độ môi trường.",
+      "output": {
+        "question": "Loài ếch mới được phát hiện có khả năng đặc biệt gì?",
+        "noncommittal": 0
+      }
+    },
+    {
+      "answer": "Everest",
+      "context": "Đỉnh núi cao nhất tính từ mực nước biển nằm ở Himalaya.",
+      "output": {
+        "question": "Ngọn núi cao nhất trên Trái Đất là gì?",
+        "noncommittal": 0
+      }
+    },
+    {
+      "answer": "Tôi không biết tính năng của điện thoại ra mắt năm 2023 vì không có thông tin sau 2022.",
+      "context": "Năm 2023 ra mắt điện thoại có pin dùng được một tháng.",
+      "output": {
+        "question": "Điện thoại ra mắt năm 2023 có tính năng đột phá nào?",
+        "noncommittal": 1
+      }
+    }
+  ],
+  "input_keys": [
+    "answer",
+    "context"
+  ],
+  "output_key": "output",
+  "output_type": "json",
+  "language": "vietnamese"
+}
