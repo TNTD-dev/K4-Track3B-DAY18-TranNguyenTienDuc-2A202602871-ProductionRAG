@@ -160,11 +160,15 @@ def evaluate_ragas(
         frame = result.to_pandas()
         frame.to_json(
             Path(__file__).resolve().parents[1] / "reports/evaluation_raw_latest.json",
-            orient="records", force_ascii=False, indent=2,
+            orient="records",
+            force_ascii=False,
+            indent=2,
         )
         for _, row in frame.iterrows():
             values = [float(row[name]) for name in metrics]
-            if not all(math.isfinite(value) and -1e-9 <= value <= 1 + 1e-9 for value in values):
+            if not all(
+                math.isfinite(value) and -1e-9 <= value <= 1 + 1e-9 for value in values
+            ):
                 raise ValueError(
                     f"RAGAS invalid metrics for {row['question']!r}: "
                     f"{dict(zip(metrics, values))}"

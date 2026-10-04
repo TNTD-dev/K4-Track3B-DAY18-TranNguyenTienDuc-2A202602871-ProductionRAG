@@ -150,31 +150,18 @@ chính sách nhiều phiên bản, phủ định, ngưỡng tiền và câu hỏ
 Các ngưỡng trên là mục tiêu dự án. Kết quả thực đo, comparison và latency của
 lần chạy lab được ghi riêng trong `analysis/failure_analysis.md` và `reports/`.
 
-## Kết quả thực đo của bản chốt
-
-Trung bình 3 lượt judge trên cùng 20 predictions/contexts, không chọn lượt tốt nhất.
+## Kết quả thực đo của lần chạy lab
 
 | Metric | Baseline | Production |
 |---|---:|---:|
-| faithfulness | 0.8528 | 0.9111 |
-| answer_relevancy | 0.7159 | 0.6815 |
-| context_precision | 0.9333 | 0.9722 |
-| context_recall | 0.9167 | 0.9389 |
+| faithfulness | 0.7969 | 0.9100 |
+| answer_relevancy | 0.7452 | 0.7384 |
+| context_precision | 0.9250 | 0.9500 |
+| context_recall | 0.9083 | 0.9333 |
 
-Đạt 3 metric ≥0,70 và Faithfulness ≥0,85; chưa đạt bonus tất cả ≥0,75. Tôi giữ caveat đúng nguồn dù Answer Relevancy thấp. Bản thử từng tính sai 10.000 hoặc dùng cả 20 ngày; calculator Decimal và nhánh tính từ quy định nguồn đã sửa thành 5 ngày quá hạn/ước tính 50.000. Hàm không đọc test ground truth và được test với số liệu khác lab.
+Metric thấp nhất là `answer_relevancy` (0.7384); đọc bottom-5 trong failure analysis để phân biệt nguyên nhân retrieval và generation.
+Cross-encoder trung bình 477.85 ms/query trong run này; không đồng nhất với latency tải model hay p95.
 
-Câu Senior còn thiếu bảng lương: retrieval chỉ bao phủ nghỉ phép. Không suy đoán số lương khi thiếu nguồn. Query decomposition/version filtering là kế hoạch tiếp theo; theo yêu cầu chốt đúng và đủ, chưa đưa thay đổi chưa đo xong vào bài nộp.
-## Kết quả thực đo của bản chốt
+Production cải thiện Faithfulness +0,1131, Precision/Recall +0,0250 nhưng Relevancy giảm 0,0068. Không nên coi thêm module là mọi metric sẽ tăng. Bài tính phí tạm ứng còn lỗi suy diễn tròn tháng; tôi ưu tiên guard về giả định tài chính và kiểm tra bằng human review trước khi dùng cho quyết định thật.
 
-Lượt đo đầy đủ cuối sau khi sửa coverage theo từng ý và chọn policy theo ngày hiệu lực; evaluator/model BGE giữ nguyên. Các bản cũ và lượt mean-3 được lưu riêng, không trộn metric.
-
-| Metric | Baseline | Production |
-|---|---:|---:|
-| faithfulness | 0.8108 | 0.8924 |
-| answer_relevancy | 0.7644 | 0.7873 |
-| context_precision | 0.9375 | 0.9917 |
-| context_recall | 0.9250 | 0.8833 |
-
-Đạt 4/4 metric ≥0,75 và Faithfulness ≥0,85, đủ cả hai bonus score. Tôi giữ caveat đúng nguồn dù Answer Relevancy thấp. Bản thử từng tính sai 10.000 hoặc dùng cả 20 ngày; calculator Decimal và nhánh tính từ quy định nguồn đã sửa thành 5 ngày quá hạn/ước tính 50.000. Hàm không đọc test ground truth và được test với số liệu khác lab.
-
-Câu Senior ban đầu thiếu bảng lương. Bản chốt query_facets truy hồi từng ý, ưu tiên một parent cho mỗi ý, rồi fill theo global rerank: đã trả lời 18 ngày và lương 20–35 triệu từ bảng lương. Policy metadata/date filtering loại phiên bản cũ cho truy vấn hiện hành, giữ bản có hiệu lực theo năm nếu hỏi lịch sử. Tests xác nhận coverage hai facet và bảo toàn lịch sử.
+Kiểm tra nộp bài cuối: `check_lab.py` exit 0, 47/47 tests trong 23,27 giây và lint pass khi dùng model đã cache với HF_HUB_OFFLINE/TRANSFORMERS_OFFLINE. Lượt online trước đó timeout 300 giây, còn lượt offline đi qua toàn bộ test; ghi nhận khả năng chờ mạng, không coi đó là bằng chứng test implementation hỏng.

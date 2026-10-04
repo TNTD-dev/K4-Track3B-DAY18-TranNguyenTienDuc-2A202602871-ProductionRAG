@@ -36,5 +36,25 @@
     "repository_public": true,
     "lms_submitted": false,
     "output": "...............................................                          [100%]\n47 passed in 17.13s\nAll checks passed!\nMetrics >= 0.70: 4/4\n🚀 Bài lab sẵn sàng để nộp!\n"
+  },
+  "final_bonus_audit": {
+    "checked_at_utc": "2026-10-04T17:05:17.038852+00:00",
+    "tests_passed": 67,
+    "exit_code": 0,
+    "todo_count": 0,
+    "full_pipeline_exit_code": 0,
+    "faithfulness_bonus_eligible": true,
+    "all_metrics_bonus_eligible": true,
+    "combined_enrichment_eligible": true,
+    "latency_report_present": true,
+    "bonus_eligible_total": 10,
+    "scores": {
+      "faithfulness": 0.8924242424242423,
+      "answer_relevancy": 0.7872668074617418,
+      "context_precision": 0.99166666659625,
+      "context_recall": 0.8833333333333332
+    },
+    "output": "...................................................................      [100%]\n67 passed in 16.59s\nAll checks passed!\nMetrics >= 0.70: 4/4\n🚀 Bài lab sẵn sàng để nộp!\n",
+    "grading_note": "Evidence meets all rubric thresholds; actual code/reflection grades are assigned by the instructor."
   }
 }

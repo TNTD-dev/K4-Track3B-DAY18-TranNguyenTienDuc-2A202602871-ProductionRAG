@@ -144,3 +144,196 @@ def test_enrichment_one_request_and_source_identity(monkeypatch, tmp_path):
     assert client.chat.completions.create.call_count == 1
     assert result.auto_metadata["source"] == result.auto_metadata["chunk_id"] == "real"
     assert result.original_text in result.enriched_text
+
+
+@pytest.mark.parametrize("content", [None, "   "])
+def test_empty_generation_response_uses_explicit_fallback(monkeypatch, content):
+    import openai
+
+    from src import pipeline
+
+    client = Mock()
+    client.chat.completions.create.return_value.choices = [
+        Mock(message=Mock(content=content, tool_calls=None))
+    ]
+    monkeypatch.setattr(openai, "OpenAI", lambda **kwargs: client)
+    monkeypatch.setattr(pipeline, "OPENAI_API_KEY", "test-key")
+    answer, status = pipeline.generate_answer("query", ["source evidence"])
+    assert answer == "source evidence"
+    assert status == "extractive_fallback"
+
+
+@pytest.mark.parametrize(
+    "expression, expected",
+    [
+        ("0.1 + 0.2", "0.3"),
+        ("4200000 * 0.03 * (16 - 10) / 30", "25200"),
+        ("-12 + 3 * (7 - 2)", "3"),
+    ],
+)
+def test_decimal_calculation(expression, expected):
+    from src.calculation import calculate
+
+    assert calculate(expression) == expected
+
+
+@pytest.mark.parametrize(
+    "expression", ["__import__('os').system('exit 1')", "2 ** 100", "1 / 0", "True + 1"]
+)
+def test_calculator_rejects_non_arithmetic_and_invalid_operations(expression):
+    from src.calculation import calculate
+
+    with pytest.raises((ValueError, ArithmeticError)):
+        calculate(expression)
+
+
+def test_generation_executes_calculator_and_returns_final_answer(monkeypatch):
+    import json
+
+    import openai
+    from openai.types.chat import ChatCompletionMessage
+
+    from src import pipeline
+
+    request = ChatCompletionMessage(
+        role="assistant",
+        content=None,
+        tool_calls=[
+            {
+                "id": "calculation-1",
+                "type": "function",
+                "function": {
+                    "name": "calculate",
+                    "arguments": json.dumps({"expression": "72 / 6"}),
+                },
+            }
+        ],
+    )
+    final = ChatCompletionMessage(role="assistant", content="Kết quả là 12.")
+    client = Mock()
+    client.chat.completions.create.side_effect = [
+        Mock(choices=[Mock(message=request)]),
+        Mock(choices=[Mock(message=final)]),
+    ]
+    monkeypatch.setattr(openai, "OpenAI", lambda **kwargs: client)
+    monkeypatch.setattr(pipeline, "OPENAI_API_KEY", "test-key")
+    answer, status = pipeline.generate_answer("chia tổng cho các nhóm", ["nguồn"])
+    assert answer == "Kết quả là 12."
+    assert status == "llm_calculated"
+    assert client.chat.completions.create.call_count == 2
+    tool_message = client.chat.completions.create.call_args.kwargs["messages"][-1]
+    assert tool_message["tool_call_id"] == "calculation-1"
+    assert json.loads(tool_message["content"]) == {"result": "12"}
+
+
+@pytest.mark.parametrize(
+    "elapsed, grace, expected", [(45, 30, "108000"), (20, 30, "0"), (30, 30, "0")]
+)
+def test_overdue_fee_excludes_grace_period(elapsed, grace, expected):
+    from src.calculation import overdue_fee
+
+    result = overdue_fee(7200000, 0.03, elapsed, grace)
+    assert result["estimated_fee"] == expected
+    assert int(result["overdue_days"]) == max(0, elapsed - grace)
+    assert result["assumption"]
+
+
+def test_overdue_fee_rejects_invalid_rate():
+    from src.calculation import overdue_fee
+
+    with pytest.raises(ValueError):
+        overdue_fee(7200000, 3, 45, 30)
+
+
+@pytest.mark.parametrize("money", ["7,2 triệu", "7.200.000 VNĐ", "7200 nghìn"])
+def test_grounded_fee_uses_source_rule_and_question_values(money):
+    from src.calculation import grounded_fee_answer
+
+    contexts = [
+        "[Nguồn: example.md]\nKhoản tạm ứng phải thanh toán trong vòng **30 ngày**. Khoản tạm ứng chưa thanh toán sau 30 ngày tính phí **3%/tháng**."
+    ]
+    answer = grounded_fee_answer(
+        f"Tạm ứng {money}, sau 45 ngày thanh toán, phí bao nhiêu?", contexts
+    )
+    assert "**108000 VNĐ**" in answer
+    assert "15 ngày" in answer
+    assert "giả định tính toán" in answer
+    assert "example.md" in answer
+
+
+def test_grounded_fee_declines_ambiguous_or_unsupported_evidence():
+    from src.calculation import grounded_fee_answer
+
+    question = "Tạm ứng 7 triệu, sau 45 ngày thanh toán, phí bao nhiêu?"
+    assert (
+        grounded_fee_answer(
+            question, ["[Nguồn: x.md]\nKhoản tạm ứng tính phí 3%/tháng."]
+        )
+        is None
+    )
+    assert (
+        grounded_fee_answer(
+            question,
+            [
+                "[Nguồn: x.md]\nKhoản tạm ứng sau 30 ngày tính phí 3%/tháng, sau 60 ngày tính phí 4%/tháng."
+            ],
+        )
+        is None
+    )
+    assert (
+        grounded_fee_answer(
+            "Tạm ứng 7 triệu đi công tác, sau 45 ngày thanh toán?", ["Khoản tạm ứng"]
+        )
+        is None
+    )
+
+
+def test_policy_version_filter_keeps_historical_evidence():
+    from src.retrieval import policy_metadata, valid_policy
+
+    a = policy_metadata(
+        {
+            "text": "# Example (Phiên bản 2020)\nNgày hiệu lực: 01/06/2020",
+            "metadata": {"source": "a"},
+        }
+    )
+    b = policy_metadata(
+        {
+            "text": "# Example (Phiên bản 2022)\nNgày hiệu lực: 01/06/2022",
+            "metadata": {"source": "b"},
+        }
+    )
+    assert a["policy_family"] == b["policy_family"]
+    versions = {a["policy_family"]: [a["effective_date"], b["effective_date"]]}
+    old, new = SearchResult("a", 1, a, "hybrid"), SearchResult("b", 1, b, "hybrid")
+    assert not valid_policy(old, "Hiện hành?", versions)
+    assert valid_policy(new, "Hiện hành?", versions)
+    assert valid_policy(old, "Năm 2021?", versions)
+    assert not valid_policy(new, "Năm 2021?", versions)
+
+
+def test_multi_part_query_covers_both_facets(monkeypatch):
+    from src import pipeline
+    from src.m3_rerank import RerankResult
+
+    a, b = [
+        SearchResult(text, 1, {"source": source}, "hybrid")
+        for text, source in [("first", "a"), ("second", "b")]
+    ]
+    search = Mock(parent_map={}, query_timings=[])
+    search.search.side_effect = [[a], [a], [b]]
+    reranker = Mock()
+    reranker.rerank.side_effect = lambda q, docs, top_k: [
+        RerankResult(d["text"], 1, 1, d["metadata"], i + 1)
+        for i, d in enumerate(docs[:top_k])
+    ]
+    monkeypatch.setattr(
+        pipeline, "generate_answer", lambda q, contexts: ("answer", "test")
+    )
+    _, contexts = pipeline.run_query(
+        "Được hỗ trợ bao nhiêu và điều kiện là gì?", search, reranker
+    )
+    assert len(contexts) == 2
+    assert any("[Nguồn: a]" in c for c in contexts)
+    assert any("[Nguồn: b]" in c for c in contexts)
+    assert search.search.call_count == 3

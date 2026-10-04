@@ -1,0 +1,247 @@
+{
+  "started_at_utc": "2026-10-04T16:12:16.309989+00:00",
+  "goal": "Improve grounded answer completeness and conditional calculations; aim for all RAGAS metrics >= 0.75 without changing the evaluator or injecting test references.",
+  "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_XET=1 .venv/bin/python main.py",
+  "same_generation_prompt_for_baseline_and_production": true,
+  "evaluator_frozen": true,
+  "report_selection": "Use the complete measured run; archive the prior run and report regressions transparently. Service failure reruns must be disclosed.",
+  "pre_optimization_directory": "reports/pre_optimization",
+  "sha256": {
+    "src/pipeline.py": "28a27180d6605d5db5f9e68b0526bdefc964b75d3a9d377f765c4d5a080b3e9e",
+    "src/m4_eval.py": "d02fd48551597b78b273e20c1bfdd0aa917493528b95b95b4da52d2cd6587697",
+    "test_set.json": "d6b607ce46067a877bbd7e27ae0af71d2f64f571a3e69da700ff9ff6b743c1c3",
+    "config.py": "22cf69d2a5849e4d763c7f51ac64c2d1146d39e6ff2a98cd6d2171c9d545ec8f",
+    "src/calculation.py": "ee7a3b39a1834693dde01d662bd722f6cf71c6446b35b1acd91353367c50d262",
+    "src/retrieval.py": "eb8877f1d19a347b564341bb68c0b7406fae892c92f29c4b326d5c4b67f0a59c"
+  },
+  "v1_result": {
+    "faithfulness": 0.8876190476190476,
+    "answer_relevancy": 0.773202023045411,
+    "context_precision": 0.9583333332716666,
+    "context_recall": 0.95,
+    "limitation": "Answer computed 10000 for a formula whose correct result is 50000; archive retained, deterministic calculation tool added before final measurement."
+  },
+  "v2_change": "Bounded Decimal calculation tool shared by baseline and production; no test-specific answer or reference supplied.",
+  "v2_result": {
+    "faithfulness": 0.8708333333333332,
+    "answer_relevancy": 0.8120992174579318,
+    "context_precision": 0.9666666665987499,
+    "context_recall": 0.9333333333333332,
+    "limitation": "Arithmetic was valid but generation selected total elapsed days rather than overdue days; complete run archived, domain tool added."
+  },
+  "v3_change": "Generic overdue_fee subtracts the explicit source grace period and returns a conditional pro-rata convention. No lab question/reference/answer is hard-coded.",
+  "v3_result": {
+    "faithfulness": 0.8875,
+    "answer_relevancy": 0.6829880145832166,
+    "context_precision": 0.9749999999324999,
+    "context_recall": 0.9333333333333332
+  },
+  "v4_change": "For unambiguous advance-payment questions, extract amount/time from the question and deadline/rate from unique source rules; deterministically compute overdue days and a conditional estimate. Conflicting or unsupported evidence falls back to ordinary RAG. No test ground truth is read.",
+  "final_evaluation_plan": {
+    "judge_repeats": 1,
+    "reason": "User requests stopping when rubric thresholds are met; one complete new run after factual multi-hop/version fixes. Prior three-run results retained in optimization_v4."
+  },
+  "final_version": "query facets, effective-date filter and conditional policy calculation",
+  "final_scores": {
+    "faithfulness": 0.8924242424242423,
+    "answer_relevancy": 0.7872668074617418,
+    "context_precision": 0.99166666659625,
+    "context_recall": 0.8833333333333332,
+    "evaluation_status": "success",
+    "evaluation_error": null,
+    "scores_valid": true,
+    "evaluator": "ragas",
+    "judge_model": "gpt-4o-mini",
+    "answer_relevancy_language": "vietnamese",
+    "evaluation_run_config": {
+      "timeout": 240,
+      "max_retries": 2,
+      "max_workers": 2
+    },
+    "evaluation_ms": 128706.38774998952,
+    "corpus_sha256": "369da66983734c2ead76b102bfc013076d447aefcf86a663590efab7116b3cf5",
+    "test_set_sha256": "d6b607ce46067a877bbd7e27ae0af71d2f64f571a3e69da700ff9ff6b743c1c3",
+    "generation_model": "gpt-4o-mini",
+    "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "build_timings_ms": {
+      "load_chunk_ms": 28.873292001662776,
+      "enrichment_ms": 12.476333999074996,
+      "index_ms": 7210.25499998359,
+      "reranker_load_ms": 2453.945208020741
+    },
+    "query_timings": [
+      {
+        "question": "Nhân viên được nghỉ bao nhiêu ngày khi kết hôn?",
+        "hybrid_search_ms": 285.4102500132285,
+        "retrieval_facets": [],
+        "rerank_ms": 424.9047089833766,
+        "generation_ms": 1710.1535419933498,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Bảo hiểm sức khỏe PVI có hạn mức bao nhiêu cho nhân viên?",
+        "hybrid_search_ms": 145.09529201313853,
+        "retrieval_facets": [],
+        "rerank_ms": 511.4972079754807,
+        "generation_ms": 1290.3798329934943,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Phụ cấp ăn trưa hàng tháng là bao nhiêu?",
+        "hybrid_search_ms": 141.65591599885374,
+        "retrieval_facets": [],
+        "rerank_ms": 502.10391599102877,
+        "generation_ms": 1252.245290990686,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nhân viên được nghỉ bao nhiêu ngày phép năm?",
+        "hybrid_search_ms": 146.83720798348077,
+        "retrieval_facets": [],
+        "rerank_ms": 410.2660419885069,
+        "generation_ms": 1301.5029579983093,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Thâm niên bao nhiêu năm thì được cộng thêm ngày phép?",
+        "hybrid_search_ms": 136.41562502016313,
+        "retrieval_facets": [],
+        "rerank_ms": 419.49012500117533,
+        "generation_ms": 1394.521000009263,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Mật khẩu phải có tối thiểu bao nhiêu ký tự?",
+        "hybrid_search_ms": 135.42866698116995,
+        "retrieval_facets": [],
+        "rerank_ms": 470.30362498480827,
+        "generation_ms": 1035.1285409997217,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Bao lâu phải đổi mật khẩu một lần?",
+        "hybrid_search_ms": 140.18491699243896,
+        "retrieval_facets": [],
+        "rerank_ms": 460.3096669889055,
+        "generation_ms": 1059.6893339825328,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Có cần kích hoạt xác thực đa yếu tố (MFA) không?",
+        "hybrid_search_ms": 143.07970899972133,
+        "retrieval_facets": [],
+        "rerank_ms": 566.3824589864817,
+        "generation_ms": 1465.5570830218494,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nhân viên thử việc có được nghỉ phép năm không?",
+        "hybrid_search_ms": 138.45758300158195,
+        "retrieval_facets": [],
+        "rerank_ms": 395.54870800930075,
+        "generation_ms": 1411.9217919942457,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Khi phát hiện malware trên máy, nhân viên có nên tự xử lý không?",
+        "hybrid_search_ms": 125.36708399420604,
+        "retrieval_facets": [],
+        "rerank_ms": 602.0079999871086,
+        "generation_ms": 1936.8288340047002,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nhân viên thử việc có được hưởng bảo hiểm sức khỏe PVI không?",
+        "hybrid_search_ms": 134.82045801356435,
+        "retrieval_facets": [],
+        "rerank_ms": 493.43929201131687,
+        "generation_ms": 1563.4692499879748,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Một nhân viên Senior có 9 năm thâm niên được nghỉ bao nhiêu ngày phép năm và lương trong khoảng nào?",
+        "hybrid_search_ms": 529.9654999980703,
+        "retrieval_facets": [
+          "Một nhân viên Senior có 9 năm thâm niên được nghỉ bao nhiêu ngày phép năm",
+          "lương trong khoảng nào?"
+        ],
+        "rerank_ms": 1725.8322080015205,
+        "generation_ms": 1987.3185420001391,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nếu cần mua một chiếc laptop 30 triệu cho nhân viên mới, ai phê duyệt và cần gì từ phòng CNTT?",
+        "hybrid_search_ms": 274.7021249961108,
+        "retrieval_facets": [
+          "Nếu cần mua một chiếc laptop 30 triệu cho nhân viên mới, ai phê duyệt",
+          "cần gì từ phòng CNTT?"
+        ],
+        "rerank_ms": 1790.9842919907533,
+        "generation_ms": 2059.539207984926,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nhân viên được tài trợ khóa học 25 triệu, nghỉ việc sau 8 tháng hoàn thành khóa học. Phải hoàn trả bao nhiêu?",
+        "hybrid_search_ms": 132.57541600614786,
+        "retrieval_facets": [],
+        "rerank_ms": 551.8541249912232,
+        "generation_ms": 2376.514625007985,
+        "generation_status": "llm_calculated"
+      },
+      {
+        "question": "Mentor và buddy của nhân viên mới có thể là cùng một người không? Quản lý trực tiếp có thể làm mentor không?",
+        "hybrid_search_ms": 139.20620799763128,
+        "retrieval_facets": [],
+        "rerank_ms": 566.7370420123916,
+        "generation_ms": 1309.3099170073401,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Muốn mua thiết bị trị giá 55 triệu cần ai phê duyệt?",
+        "hybrid_search_ms": 141.44191701780073,
+        "retrieval_facets": [],
+        "rerank_ms": 489.5673749851994,
+        "generation_ms": 1467.5708330178168,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nhân viên tạm ứng 15 triệu, sau 20 ngày mới thanh toán. Bị phạt bao nhiêu?",
+        "hybrid_search_ms": 126.41304198768921,
+        "retrieval_facets": [],
+        "rerank_ms": 527.6022079924587,
+        "generation_ms": 0.6479579897131771,
+        "generation_status": "policy_calculated"
+      },
+      {
+        "question": "Lương thử việc của nhân viên Junior mức cao nhất là bao nhiêu?",
+        "hybrid_search_ms": 27.900542016141117,
+        "retrieval_facets": [],
+        "rerank_ms": 476.77804200793616,
+        "generation_ms": 2130.6255829986185,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Thông tin lương thuộc cấp độ phân loại dữ liệu nào?",
+        "hybrid_search_ms": 107.88654102361761,
+        "retrieval_facets": [],
+        "rerank_ms": 581.4395420020446,
+        "generation_ms": 1571.9709170225542,
+        "generation_status": "llm"
+      },
+      {
+        "question": "Nghỉ phép không lương 20 ngày cần ai phê duyệt?",
+        "hybrid_search_ms": 138.2428750221152,
+        "retrieval_facets": [],
+        "rerank_ms": 448.69704102165997,
+        "generation_ms": 1310.4181250091642,
+        "generation_status": "llm"
+      }
+    ],
+    "enrichment_status": {
+      "llm": 100,
+      "extractive_fallback": 0
+    },
+    "retrieval_backend": "qdrant_server",
+    "embedding_model": "BAAI/bge-m3"
+  }
+}

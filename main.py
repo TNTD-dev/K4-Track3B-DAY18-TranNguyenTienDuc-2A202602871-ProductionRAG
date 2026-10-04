@@ -62,7 +62,7 @@ def main():
 
         if not all(r["aggregate"].get("scores_valid") for r in (naive, prod)):
             print("RAGAS chưa thành công; không thể so sánh điểm fallback.")
-            return
+            raise SystemExit(1)
         print(f"\n{'Metric':<25} {'Basic':>8} {'Production':>12} {'Δ':>8}")
         print("-" * 55)
         for m in [

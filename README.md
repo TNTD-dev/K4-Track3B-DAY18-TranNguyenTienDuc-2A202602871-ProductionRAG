@@ -213,3 +213,9 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python check_lab.py
 
 Xem thêm `analysis/rubric_checklist.md` để đối chiếu từng tiêu chí với bằng chứng,
 và `analysis/failure_analysis.md` cho bảng kết quả cùng các giới hạn còn lại.
+
+Bản chốt bổ sung `src/retrieval.py`: truy hồi từng ý của câu hỏi nhiều phần và
+chọn phiên bản policy có hiệu lực theo ngày/năm hỏi trước rerank. `src/calculation.py`
+tính số thập phân có giới hạn; trường hợp phí rõ quy định dùng nhánh tính từ
+source và dữ kiện người hỏi, luôn ghi giả định pro-rata. Bản cuối đạt cả 4 metrics
+≥0,75 và Faithfulness ≥0,85; các thí nghiệm trước được giữ riêng trong reports/.
