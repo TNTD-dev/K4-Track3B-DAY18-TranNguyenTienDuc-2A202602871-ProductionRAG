@@ -21,5 +21,20 @@
     "submission_check_exit_code": 0,
     "submission_check_output": "...............................................                          [100%]\n47 passed in 18.21s\nAll checks passed!\nMetrics >= 0.70: 4/4\nSubmission checks passed\n",
     "corpus_and_test_set_unchanged": true
+  },
+  "final_submission_audit": {
+    "checked_at_utc": "2026-10-04T13:29:31.782675+00:00",
+    "exit_code": 0,
+    "tests_passed": 47,
+    "test_seconds": 17.13,
+    "todo_count_src": 0,
+    "json_schema_matches_upstream": true,
+    "per_question_and_aggregate_consistent": true,
+    "failure_analysis_matches_bottom_five": true,
+    "reflection_exact_filename": true,
+    "repository_name_correct": true,
+    "repository_public": true,
+    "lms_submitted": false,
+    "output": "...............................................                          [100%]\n47 passed in 17.13s\nAll checks passed!\nMetrics >= 0.70: 4/4\n🚀 Bài lab sẵn sàng để nộp!\n"
   }
 }

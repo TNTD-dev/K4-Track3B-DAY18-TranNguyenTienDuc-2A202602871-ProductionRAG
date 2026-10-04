@@ -10,3 +10,6 @@ CODELAB.md
 .venv
 .cache/
 .lavish/
+
+# Scratch output from evaluation smoke tests
+reports/evaluation_raw_latest.json
