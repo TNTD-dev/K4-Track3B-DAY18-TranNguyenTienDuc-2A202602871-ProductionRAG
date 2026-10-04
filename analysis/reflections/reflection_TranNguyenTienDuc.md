@@ -1,7 +1,7 @@
 # Reflection — Production RAG Pipeline
 
-**Học viên:** Trần Nguyễn Tiến Đức · **MSSV:** 2A202602871 · K4 Track 3B  
-**Ngày triển khai:** 04/10/2026 (GMT+7)  
+**Học viên:** Trần Nguyễn Tiến Đức · **MSSV:** 2A202602871 · K4 Track 3B
+**Ngày triển khai:** 04/10/2026 (GMT+7)
 Ghi chép dựa trên code và các lần chạy thực nghiệm trong repository này.
 
 ## 1. Lecture → code
